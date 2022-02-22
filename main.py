@@ -279,7 +279,9 @@ class TodoParser(object):
     """Parser for extracting information from a given diff file."""
     FILE_HUNK_PATTERN = r'(?<=diff)(.*?)(?=diff\s--git\s)'
     HEADER_PATTERN = r'(?<=--git).*?(?=$\n(index|new|deleted))'
-    LINE_PATTERN = r'^.*$'
+    #LINE_PATTERN = r'^.*$'
+    LINE_PATTERN = r'^(?=\s*)|(.*$)' # ^(\s*(.*)$)|(?=\s*)|(.*$) || ^(?=\s*)|(.*$) || ^(.*$) || ^(?=\s*)|(.*$) || r'^.*?(?=: )' || r'^.*?(?=\s)'
+    TODO_PATTERN = r'(?<=\s|^)(TODO)(?=\s|$)'
     FILENAME_PATTERN = re.compile(r'(?<=a/).+?(?=\sb/)')
     LINE_NUMBERS_PATTERN = re.compile(r'@@[\d\s,\-+]*\s@@.*')
     LINE_NUMBERS_INNER_PATTERN = re.compile(r'@@[\d\s,\-+]*\s@@')
@@ -296,6 +298,10 @@ class TodoParser(object):
         # We could support more identifiers later quite easily.
         self.identifier = 'TODO'
         self.languages_dict = None
+        self.identifier = 'TODO:'
+        self.languages_dict = PHP_LANGUAGES_DICT
+        self.identifier = 'FIXME:'
+        self.languages_dict = PHP_LANGUAGES_DICT
 
         # Load the languages data for ascertaining file types.
         languages_url = 'https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml'
@@ -308,7 +314,7 @@ class TodoParser(object):
             raise Exception('Cannot retrieve languages data. Operation will abort.')
 
         # Load the comment syntax data for identifying comments.
-        syntax_url = 'https://raw.githubusercontent.com/alstr/todo-to-issue-action/master/syntax.json'
+        syntax_url = 'https://raw.githubusercontent.com/sumonst21/todo-to-issue-action/master/syntax.json'
         syntax_request = requests.get(url=syntax_url)
         if syntax_request.status_code == 200:
             self.syntax_dict = syntax_request.json()
